@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat Bot</title>
+  </head>
+  <body>
+    <style>
+      body {
+        background-color: #fafafa ;
+        transition: all 500ms;
+        display: flex;flex-direction: column;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #loader {
+        width: 100%;height:6px;
+        background-color: rgb(22, 162, 180);
+        border-radius: 10px; display: none;
+        animation:loading 3s infinite;
+      }
+      @keyframes loading {
+          0% {
+            margin-left:0px;
+            width: 0px;
+          }
+          25% {
+            margin-left:0px;
+            width: 100%;
+          }
+          50% {
+            margin-left:calc(100% - 50px);
+            width: 50px;
+          }
+          100% {
+            margin-left:0;
+            width: 100%;
+          }
+      }
+      #message {
+        width:calc(100% - 30px);
+        margin-top:50px;max-width: 350px;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.07);
+        margin-left: auto;margin-right: auto;
+        padding: 20px 10px;font-size: 20px;
+        outline: none;border:0px;
+        transition: all 500ms;
+      }
+      #message:focus::placeholder {
+        color:#fafafa;
+      }
+      #message:focus{
+        background-color: rgb(11, 157, 194);
+        color: #fff;
+      }
+      #response {
+        height: auto;
+        max-height: calc(100% - 60px);
+        width:calc(100% - 30px);
+        margin-top:20px;max-width: 350px;
+        background-color: rgb(11, 157, 194) ;
+        transition: all 500ms;
+        color: #fafafa;
+        border-radius: 10px;
+        font-size: 18px;
+        padding: 10px 10px;
+        margin-left: auto;margin-right: auto;
+        overflow: auto;
+        box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.07);
+        display: none;
+      }
+      @media screen and (max-width:500px) {
+        #message {
+          margin-top:20px; 
+          border-radius: 5px;
+          font-size: 17px;
+        }
+        #response {
+           border-radius: 5px;
+           font-size: 15px;
+        }
+      }
+    </style>
+          <div id="loader"></div>
+          <input id="message" placeholder="Ask me anything"/>
+
+          <div id="response">
+          </div>
+  </body>
+  <script>
+      const prompt = document.querySelector("#message")
+      const response = document.querySelector("#response")
+      prompt.onkeyup = (keycode) => {
+        if((keycode.key + "").toLowerCase() == 'enter') {
+            //check if its value aint empty
+            response.style.display = 'none'
+            if(prompt.value.trim() != "") {
+                //query server
+                queryAi(prompt.value)
+                .then(res => {
+                  cancelLoadingEffect()
+                  response.innerHTML = res.message
+                  response.style.display = 'flex'
+                })
+                .catch(e => {
+                  cancelLoadingEffect()
+                  alert('Something went wrong')
+                })
+                //do loading effect
+                doLoadingEffect()
+            }
+        }
+      }
+
+      const doLoadingEffect = () => {
+        document.querySelector("#loader").style.display = 'flex'
+      }
+      const cancelLoadingEffect = () => {
+        document.querySelector("#loader").style.display = 'none'
+      }
+
+      const queryAi = async (prompt) => {
+        const data = {
+            prompt:prompt,
+        }
+        return fetch("/chat", {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)// body data type must match "Content-Type" header
+      }).then((response) => response.json()
+        .then((data) => {return data}))
+      }
+  </script>
+</html>
